@@ -39,14 +39,18 @@ for i=1:max(Trj_real(:,1))%后车车辆循环
                         zone1 = Trj_real(Trj_real(:,4)>=Trj_real(Trj_real(:,1)==i&abs(Trj_real(:,2)-t)<0.06,4)-5&Trj_real(:,4)<=Trj_real(Trj_real(:,1)==i&abs(Trj_real(:,2)-t)<0.06,4)+5,:);%统计区域为10m
                         density1 = length(zone1(abs(zone1(:,2)-t)<0.06,1))/(4*10);
                         interdistance = min(0.156*density1^(-0.18746),1.6);
-                        comfort_lateral = min(0.6+interdistance,1.6);
+                        comfort_lateral = min(0.8+interdistance,1.6);
                         r2 = 0.8-0.5*Trj_real(Trj_real(:,1)==i&abs(Trj_real(:,2)-t)<0.06,6)*sin(pi-2*acos(9.*1.0*tan(pi*15/180)/(Trj_real(Trj_real(:,1)==i&abs(Trj_real(:,2)-t)<0.06,6).^2)))+comfort_lateral;
                         a1=Trj_real(abs(Trj_real(:,2)-t)<0.06&Trj_real(:,1)==i,4);
                         a2=Trj_real(abs(Trj_real(:,2)-t)<0.06&Trj_real(:,1)==front_bike(j,1),4);
                         if abs(a1(1)-a2(1))<=r1
                             a3=Trj_real(abs(Trj_real(:,2)-t)<0.06&Trj_real(:,1)==i,3);
                             a4=Trj_real(abs(Trj_real(:,2)-t)<0.06&Trj_real(:,1)==front_bike(j,1),3);
-                            if abs(a3(1)-a4(1))<=r2%侵犯舒适空间？
+                            if abs(a3(1)-a4(1))<=r2%侵犯舒适空间？                               
+%                                delta_x = abs(front_bike(j,3)-back_bike(1,3));
+%                                delta_y = abs(front_bike(j,4)-back_bike(1,4));
+%                                 yy = delta_y.^2/r1 + delta_x.^2/r2; 
+%                                 if yy<=1 & (front_bike(j,4)-back_bike(1,4)>=0)
                                 overtake_number = overtake_number+1;%超车次数累加
                                 time_overtake =[time_overtake; t];%超车时刻
                                 longitudinal_distance =[ longitudinal_distance; abs(a2(1)-a1(1))];%纵向间距m
@@ -58,6 +62,7 @@ for i=1:max(Trj_real(:,1))%后车车辆循环
                                 tip = 1;
                                 bike_number=[bike_number;i];%超车车辆-后车
                                 break;
+%                                 end 
                             end
                         end
                     end
@@ -108,6 +113,11 @@ end
                                 a3=Trj_sfm(abs(Trj_sfm(:,2)-t)<0.06&Trj_sfm(:,1)==i,3);
                                 a4=Trj_sfm(abs(Trj_sfm(:,2)-t)<0.06&Trj_sfm(:,1)==front_bike(j,1),3);
                                 if abs(a3(1)-a4(1))<=r2%侵犯舒适空间？
+                                    
+                                    delta_x = abs(front_bike(j,3)-back_bike(1,3));
+                                    delta_y = abs(front_bike(j,4)-back_bike(1,4));
+                                    yy = delta_y.^2/r1 + delta_x.^2/r2; 
+                                    if yy<=1 & (front_bike(j,4)-back_bike(1,4)>=0)                                    
                                     overtake_number = overtake_number+1;%超车次数累加
                                     time_overtake =[time_overtake; t];%超车时刻
                                     longitudinal_distance =[ longitudinal_distance; abs(a2(1)-a1(1))];%纵向间距m
@@ -119,6 +129,7 @@ end
                                     tip = 1;
                                     bike_number=[bike_number;i];%超车车辆-后车
                                     break;
+                                    end 
                                 end
                             end
                         end
@@ -173,6 +184,10 @@ end
                                 a3=Trj_MSFMcomfortzone(abs(Trj_MSFMcomfortzone(:,2)-t)<0.06&Trj_MSFMcomfortzone(:,1)==i,3);
                                 a4=Trj_MSFMcomfortzone(abs(Trj_MSFMcomfortzone(:,2)-t)<0.06&Trj_MSFMcomfortzone(:,1)==front_bike(j,1),3);
                                 if abs(a3(1)-a4(1))<=r2%侵犯舒适空间？
+                                    delta_x = abs(front_bike(j,3)-back_bike(1,3));
+                                    delta_y = abs(front_bike(j,4)-back_bike(1,4));
+                                    yy = delta_y.^2/r1 + delta_x.^2/r2; 
+                                    if yy<=1 & (front_bike(j,4)-back_bike(1,4)>=0)                                    
                                     overtake_number = overtake_number+1;%超车次数累加
                                     time_overtake =[time_overtake; t];%超车时刻
                                     longitudinal_distance =[ longitudinal_distance; abs(a2(1)-a1(1))];%纵向间距m
@@ -184,6 +199,7 @@ end
                                     tip = 1;
                                     bike_number=[bike_number;i];%超车车辆-后车
                                     break;
+                                    end 
                                 end
                             end
                         end
