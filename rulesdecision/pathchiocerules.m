@@ -1,5 +1,5 @@
 %% pathchoicesimulation 
-function [tagA,tagB,tag_rang,tag_emergency,pathchoice_dataset]= pathchiocerules(subject_vehicle,vehicle,LX,LY,LYB,leadvehicle,TLA,TLB)
+function [tagA,tagB,tag_rang,tag_emergency,pathchoice_dataset]= pathchiocerules(subject_vehicle,vehicle,LX,LY,LYB,leadvehicle,TLB)
 tagA =0; tagB = 0; tag_rang=0; tag_emergency = 0;%归零 
 vehicle1 = vehicle(vehicle(:,1)~=subject_vehicle(1,1),:);
 pathchoice_dataset = []; pathchoice_dataset_final = [];
@@ -119,48 +119,58 @@ pathchoice_dataset = []; pathchoice_dataset_final = [];
     pathchoice_dataset = [subject_vehicle(1,1), lead_vehicle_number,subject_vehicle(1,2),tag...
                          delta_speed_sp,distance_sp, lateral_spl ,lateral_spr,clearance_pl,clearance_pr,delta_speed_spl,...
                            distance_spl,lateral_pl,delta_speed_spr,distance_spr,lateral_pr,delta_speed_sl,distance_sl,delta_speed_sr,distance_sr];%路径选择信息
-   pathchoice_dataset_final = [pathchoice_dataset_final;pathchoice_dataset];                    
-
+   pathchoice_dataset_final = [pathchoice_dataset_final;pathchoice_dataset];        
+   
+lateral_distance = max([clearance_pl;clearance_pr;lateral_pr;lateral_pl]);
    if  (longitudinal>LYB&longitudinal<LY)%A点处 速度和位置微调，接近阶段       
 %超车规则   
-
-
-
-
-
-    if  pre_0_probabilities==pro_max
-        tagA= 1;
-    else if pre_1_probabilities==pro_max
-           tagA = 2; 
-        else
-          tagA = 3;
-        end
-    end    
+      if (delta_speed_sp<=0 & lateral_distance>=LX)|(delta_speed_sp<=-2 & lateral_distance>=max(0.8*LX,1))%overtaking conditions forwards
+         if (delta_speed_sl>=0&distance_sl>1.2)|(delta_speed_sr>=0&distance_sr>1.2)%overtaking conditions surrounding
+%overtaking direction
+            if  (max([clearance_pl;lateral_pl])>max([clearance_pr;lateral_pr]))&(delta_speed_sl>=0&distance_sl>1.2)% turning left
+                tagA= 1;
+            else if (max([clearance_pl;lateral_pl])<=max([clearance_pr;lateral_pr]))&(delta_speed_sr>=0&distance_sr>1.2)
+                   tagA = 3; 
+                else 
+                  tagA = 2;
+                end
+            end 
+         else
+             tagA =2;
+         end   
+      else
+          tagA =2;
+      end
    end  
-
-   
-   
-   
+  
    if (longitudinal<=LYB&longitudinal>=3) %B点 超车执行      
-%离散选择模型     
-   
-
-
-
-
-    if  pre_0_probabilities==pro_max
-        tagB = 1;
-    else if pre_1_probabilities==pro_max
-          tagB = 2;
-        else
-          tagB = 3;
-        end
-    end 
+      if (delta_speed_sp<=0 & lateral_distance>=LX)|(delta_speed_sp<=-2 & lateral_distance>=max(0.8*LX,1))%overtaking conditions forwards    
+         if (delta_speed_sl>=0&distance_sl>1.2)|(delta_speed_sr>=0&distance_sr>1.2)%overtaking conditions surrounding  
+            if  TLB(1,1)==1
+                tagB = 1;    
+            else if TLB(1,2)==1
+                  tagB = 3;
+                else if (max([clearance_pl;lateral_pl])>max([clearance_pr;lateral_pr]))&(delta_speed_sl>=0&distance_sl>1.2)% turning left
+                        tagB= 1;
+                    else if (max([clearance_pl;lateral_pl])<=max([clearance_pr;lateral_pr]))&(delta_speed_sr>=0&distance_sr>1.2)
+                         tagB= 3;
+                        else
+                         tagB = 2;     
+                        end
+                    end   
+                end
+            end 
+           tagB = 2;  
+         end
+      else
+          tagB = 2;     
+      end    
    end  
+     
     if longitudinal<=max([3;LX+1.8]) %前车横向调整，让行%4
         tag_rang = 1;
     end
-     if longitudinal<1.5 & abs(leadvehicle(1,3)-subject_vehicle(1,3))<0.4  %C点 紧急情况
+     if longitudinal<1.5 & abs(leadvehicle(1,3)-subject_vehicle(1,3))<0.5  %C点 紧急情况
        tag_emergency = 1;
      end
 end
