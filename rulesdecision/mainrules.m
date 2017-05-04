@@ -72,7 +72,7 @@ for T=Tmin:0.12:Tmax
               end              
              if  sum(TLB,2)==0
                 [tagA,tagB,tag_rang,tag_emergency,pathchoice_dataset]=...
-                             pathchiocerules(subject_vehicle,vehicle,LX,LY,LYB,leadvehicle,TLA,TLB) ;%L:1 S:2 R:3，不起作用：tag=0                  
+                             pathchiocerules(subject_vehicle,vehicle,LX,LY,LYB,leadvehicle,TLB) ;%L:1 S:2 R:3，不起作用：tag=0                  
              else
                tagB = taptagB(1,vehicle(i,1));%查询中间变量中本车的tagB的值
                tagA =0;
@@ -96,7 +96,7 @@ for T=Tmin:0.12:Tmax
                 TAGB(i,:) = [0,1];
             end   
          else
-             comfort = [subject_vehicle(1,1),-1,T,comfort_lateral,LX,LY];        
+             comfort = [subject_vehicle(1,1),-1,T,comfort_lateral,LX,LY,LYB];        
          end
              information = [information;comfort];     
              tap(i,:) = [comfort(:,1:3),TAGA(i,:),TAGB(i,:)];            
@@ -114,7 +114,7 @@ if ~isempty(leadvehicle)
      end  
      if tagA ==1%向左调整
          %相对速度变化趋势线调整
-         [newacceleration] = overtakeapproving(subject_vehicle,leadvehicle);
+         [newacceleration] = overtakeapproving(subject_vehicle,leadvehicle,LYB);
          forcebike_bike(i,:) = newacceleration;
          a_driving(i,:) = 0;
          forceboundary(i,:) = 0;         
@@ -126,7 +126,7 @@ if ~isempty(leadvehicle)
         %========
      if tagA ==3%向右调整
          %相对速度变化趋势线调整
-         [newacceleration] = overtakeapproving(subject_vehicle,leadvehicle);
+         [newacceleration] = overtakeapproving(subject_vehicle,leadvehicle,LYB);
          forcebike_bike(i,:) = newacceleration;
          a_driving(i,:) = 0;
          forceboundary(i,:) = 0;         
@@ -134,7 +134,7 @@ if ~isempty(leadvehicle)
         %========  
      if tagB ==1%向左超车
          %相对速度变化趋势线调整
-         [newacceleration] = overtakeapproving(subject_vehicle,leadvehicle);
+         [newacceleration] = overtakeapproving(subject_vehicle,leadvehicle,LYB);
          forcebike_bike(i,:) = newacceleration;
          a_driving(i,:) = 0;
          forceboundary(i,:) = 0;         
@@ -148,7 +148,7 @@ if ~isempty(leadvehicle)
         %========  
      if tagB ==3%向右超车
          %相对速度变化趋势线调整
-         [newacceleration] = overtakeapproving(subject_vehicle,leadvehicle);
+         [newacceleration] = overtakeapproving(subject_vehicle,leadvehicle,LYB);
          forcebike_bike(i,:) = newacceleration;
          a_driving(i,:) = 0;    
          forceboundary(i,:) = 0;      
@@ -351,14 +351,14 @@ end
 xlswrite('MSFMcomfortzone_mymodel',data_final);
 %% 画图
 index = find(~isnan(bike(:,1)));
-figure 
 
+figure 
 for i=1:size(index,1)-1
 plot(bike(index(i)+1:index(i+1)-1,4),bike(index(i)+1:index(i+1)-1,3),'b');
 hold on;
 plot( data_final(data_final(:,1)==bike(index(i),1),4),data_final(data_final(:,1)==bike(index(i),1),3),'r'); 
-% pause(0.5);
-% hold off;
+pause(0.5);
+hold off;
 end
 axis([-10 100 0 8]);
 grid;
