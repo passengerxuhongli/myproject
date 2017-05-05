@@ -47,10 +47,14 @@ for T=Tmin:0.12:Tmax
         
         if exist('leadvehicle','var')&~isempty(leadvehicle)         
             tapleadvehicle(vehicle(i,1),:)=vehicle(vehicle(:,1)==leadvehicle(1,1),:);
-        else if exist('tapleadvehicle','var')&size(tapleadvehicle,1)>=i
+        else if exist('tapleadvehicle','var')%&size(tapleadvehicle,1)>=i
                 try
                     tapleadvehicle(vehicle(i,1),:)=vehicle(vehicle(:,1)==tapleadvehicle(i,1),:);
+                catch
+                    tapleadvehicle(vehicle(i,1),:)=0;
                 end%记录有史以来离我最近的时刻的前车
+            else 
+                    tapleadvehicle(vehicle(i,1),:)=zeros(1,11); 
             end
         end
         overtakeback = [];  %为空表示该车没有前车，如不在自由行使，则处在返回阶段        
@@ -177,8 +181,11 @@ if ~isempty(leadvehicle)
 else  %若前车为空       
         if ~exist('tagB','var')
             tagB = 0;
-        end       
-      if isempty(overtakeback)& (tagB~=0 & tagB~=2)%无前车的状态只能为自由行使/返回，tagB不为零和2表明该车处于返回阶段
+        end   
+        
+      if isempty(overtakeback)& (tagB~=0 & tagB~=2)&...
+              (length(taptagB)>=subject_vehicle(1,1)&&...
+              taptagB(subject_vehicle(1,1))~=0&taptagB(subject_vehicle(1,1))~=2)%无前车的状态只能为自由行使/返回，tagB不为零和2,之前时刻为超车阶段，表明该车处于返回阶段
        %the distance between subject_vehicle and leadvehicle      
        distance = subject_vehicle(1,4)-tapleadvehicle(i,4);       
                  if distance>0&distance<5  %返回原有车道的机制
@@ -277,9 +284,22 @@ else
      end
     %前车让行加速度更新
 %   =============  
-    if ~isempty(choicetag(choicetag(:,3)==1,6))
-    vehicle(vehicle(:,1)==choicetag(choicetag(:,3)==1,6),7) = unique( pa_ad(pa_ad(:,1)==choicetag(choicetag(:,3)==1,6),2));  
-    end
+%     if ~isempty(choicetag(choicetag(:,3)==1,6))
+%     vehicle(vehicle(:,1)==choicetag(choicetag(:,3)==1,6),7) = unique( pa_ad(pa_ad(:,1)==choicetag(choicetag(:,3)==1,6),2));  
+%     end
+    
+     if ~isempty(choicetag(choicetag(:,3)==1,6))&~isempty(pa_ad)
+        inter_pa_ad = pa_ad(pa_ad(:,1)==choicetag(choicetag(:,3)==1,6),2);
+        if ~isempty(inter_pa_ad)
+        vehicle(vehicle(:,1)==choicetag(choicetag(:,3)==1,6),7) = unique( pa_ad(pa_ad(:,1)==choicetag(choicetag(:,3)==1,6),2));   
+        end
+    end   
+    
+    
+    
+    
+    
+    
 %         tag_emergency=2;%避让结束标志
 %  ==============   
     %加速度更新
@@ -357,8 +377,8 @@ for i=1:size(index,1)-1
 plot(bike(index(i)+1:index(i+1)-1,4),bike(index(i)+1:index(i+1)-1,3),'b');
 hold on;
 plot( data_final(data_final(:,1)==bike(index(i),1),4),data_final(data_final(:,1)==bike(index(i),1),3),'r'); 
-pause(0.5);
-hold off;
+% pause(0.5);
+% hold off;
 end
 axis([-10 100 0 8]);
 grid;
