@@ -160,6 +160,7 @@ lateral_distance = max([clearance_pl;clearance_pr;lateral_pr;lateral_pl]);
                     end   
                 end
             end 
+         else
            tagB = 2;  
          end
       else
